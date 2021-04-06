@@ -27,14 +27,14 @@ public class Operaciones { //Clase que va a tratar con las operaciones que se le
         try { //Lo que pasa primero 
            exe = Integer.parseInt(separar[1]); 
             switch (separar[0]){ //Switch que me ayuda a evaluar cuando venga el signo de la expresion ingresada
-                case  "+": //Caso en el que venga una suma (+)
+                case  "-": //Caso en el que venga una resta (-)
                     for (int i = 2; i < separar.length; i++) { 
                         if(!separar[i].equals(" ")){
                             exe += Integer.parseInt(separar[i]); //Agrego
                         }
                     }
                     break;
-                case  "-": //En caso de que venga un  resta (-)
+                case  "+": //En caso de que venga una suma (+)
                     for (int i = 2; i < separar.length; i++) {
                         if(!separar[i].equals(" ")){
                             exe -= Integer.parseInt(separar[i]);
