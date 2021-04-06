@@ -1,6 +1,10 @@
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import javax.swing.plaf.synth.SynthSplitPaneUI;
+
+
+
 /**
  * Interprete
  */
@@ -70,10 +74,11 @@ public class Interprete {
         String[] lista = instruccion.split("(?=\\()|(?=-)");
 
         // Descomentar para ver como estan ordenados los comandos
-        // for (int i = 0; i < lista.length; i++) {
-        // String tempOrden = lista[i].replace("-", "'(");
-        // System.out.println(tempOrden);
-        // }
+        
+        /*for (int i = 0; i < lista.length; i++) {
+            String tempOrden = lista[i].replace("-", "'(");
+            System.out.println(tempOrden);
+        }*/
 
         for (int i = 0; i < lista.length; i++) {
 
@@ -236,6 +241,7 @@ public class Interprete {
                     if (variable.getNombre().equals(nombre)) {
                         existeVariable = true;
                         variableExistente = variable;
+                        //System.out.println(nombre);
 
                     }
                 }
@@ -982,10 +988,86 @@ public class Interprete {
 
             // CONDICIONALES
 
-            case "ecuals":
+            case "ecuals": // Devuelve T si dos variables son iguales, nil si no lo son.
+                //Ejemplos de ecuals: (setq a(10)) (setq b(10)) (ecuals a b)
+
+                /*String var1 = lista[0];
+                String var2 = lista[1];*/
+                String nom = comando[1];
+                String nom2 = comando[2];
+                Variable _var1 = null;
+                Variable _var2 = null;
+                
+                try{
+
+                    for(Variable variable : variables){
+                        if(variable.getNombre().equals(nom)){
+                            _var1 = variable;
+                            //System.out.println(_var1);
+                        }
+                    }
+
+                    for(Variable variablee : variables){
+                        if(variablee.getNombre().equals(nom2)){
+                            _var2 = variablee;
+                            //System.out.println(_var2);
+                        }
+                    }
+
+                    if(_var1.getValor().equals(_var2.getValor())){
+                        vista.print("T");
+                    }else {
+                        vista.print("nil");
+                        
+                    }
+
+                } catch(Exception e){
+                    vista.prinrErr("[!] Una o ambas variables no existen!");
+                    
+                }
+                
                 break;
 
-            case "eval":
+            case "eval"://Ejemplo eval (eval (+ 1 2)) (eval (* 1 2))
+                
+                String eval = lista[1];
+                char aa = ' ';
+                char ab = ' ';
+                int num1 = 0;
+                int num2 = 0;
+                
+                /*
+                System.out.println(lista[0]);
+                System.out.println(lista[1].getClass().getSimpleName() + lista[1]);
+                System.out.println(eval.charAt(1));*/
+
+                if(eval.charAt(1) == '+'){
+                    aa = eval.charAt(3);
+                    ab = eval.charAt(5);
+                    num1 = Integer.parseInt(String.valueOf(aa));
+                    num2 = Integer.parseInt(String.valueOf(ab));
+                    System.out.println(num1 + num2);
+                }else if(eval.charAt(1) == '−'){
+                    aa = eval.charAt(3);
+                    ab = eval.charAt(5);
+                    num1 = Integer.parseInt(String.valueOf(aa));
+                    num2 = Integer.parseInt(String.valueOf(ab));
+                    System.out.println(num1 - num2);
+                }else if(eval.charAt(1) == '*'){
+                    aa = eval.charAt(3);
+                    ab = eval.charAt(5);
+                    num1 = Integer.parseInt(String.valueOf(aa));
+                    num2 = Integer.parseInt(String.valueOf(ab));
+                    System.out.println(num1 * num2);
+                }else if(eval.charAt(1) == '/'){
+                    aa = eval.charAt(3);
+                    ab = eval.charAt(5);
+                    num1 = Integer.parseInt(String.valueOf(aa));
+                    num2 = Integer.parseInt(String.valueOf(ab));
+                    System.out.println(num1 / num2);
+                }else{
+                    vista.prinrErr("[!] Comando no reconocido, intente con {+, -, *, /}");
+                }
                 break;
 
             case "cond":
@@ -993,13 +1075,62 @@ public class Interprete {
 
             // PREDICADOS
 
-            case "null":
+            case "null": //Ejemplo null (setq a(')) (null a)
+            
+                String nu = comando[1];
+                Variable varNu = null;
+
+                for(Variable variabless : variables){
+                    if(variabless.getValor() != null){
+                        varNu = variabless;
+                        vista.print("T");
+                    }else{
+                        vista.print("nil");
+                    }
+                }
                 break;
 
             case "atom":
+                /*
+                String atom = comando[1];
+                Variable atomm = null;
+                */
                 break;
 
-            case "numberp":
+            case "numberp": //Ejemplo numberp (numberp 10) (setq a(10)) (numberp a) (setq c('hola'))
+                            //(numberp c)
+                
+                String val = comando[1];
+                Variable vall = null;
+                String abc = "";
+
+
+                for(Variable varrr : variables){
+                    if(varrr.getNombre().equals(val)){
+                        vall = varrr;
+                        val = vall.getValor();
+                    }
+                }
+
+                if(vall == null){
+                    if(isNumeric(val)){
+                        vista.print("T");
+                    }else{
+                        vista.print("nil");
+                    }
+                }else{
+                    abc = vall.getValor();
+
+                    if(isNumeric(abc)){
+                        vista.print("T");
+                    }else{
+                        vista.print("nil");
+                        System.out.println("---> " + vall);
+                        System.out.println("---> " + abc.getClass().getSimpleName());
+                    }
+                }
+
+                
                 break;
 
             }
