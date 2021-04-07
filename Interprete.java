@@ -3,12 +3,6 @@ import java.util.List;
 import java.util.Scanner;
 
 
-import javax.swing.plaf.synth.SynthSplitPaneUI;
-
-
-
-
-
 /**
  * Interprete
  */
@@ -49,7 +43,7 @@ public class Interprete {
                 if (parentesisApertura == parentesisCierre) {
 
                     if (parentesisCierre > 0) {
-                        evaluar(instruccion);
+                        String result = evaluar(instruccion);
                     } else {
                         vista.prinrErr("[!] Las intrucciones deben iniciar con '(' y finalizar con ')'");
                     }
@@ -67,7 +61,9 @@ public class Interprete {
      * 
      * @param instruccion
      */
-    public void evaluar(String instruccion) {
+
+   
+    public String evaluar(String instruccion) {
 
         // Limpiar cadena
         instruccion = instruccion.trim();
@@ -1307,6 +1303,7 @@ public class Interprete {
 
         }
 
+        return "";
     }
 
     // UTILIDADES
