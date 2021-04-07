@@ -56,8 +56,9 @@ public class Funciones { //Clase con la que voy a poder evaluar las funciones qu
             } else { //Si no pasa lo dea rriba
             obj.append(auxiliar[i]);
             obj.append(" "); 
+            }
         }
-
+    
         return obj.toString();
     }
 
