@@ -1,7 +1,11 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
+
 import javax.swing.plaf.synth.SynthSplitPaneUI;
+
+
 
 
 
@@ -17,7 +21,7 @@ public class Interprete {
     String instruccion = "";
 
     // Variables
-    ArrayList<Variable> variables = new ArrayList<Variable>();
+    List<Variable> variables = new ArrayList<>();
 
     /*
      * Pide las intrucciones por consola y las ejecuta
@@ -74,8 +78,8 @@ public class Interprete {
         String[] lista = instruccion.split("(?=\\()|(?=-)");
 
         // Descomentar para ver como estan ordenados los comandos
-        
-        /*for (int i = 0; i < lista.length; i++) {
+        /*
+        for (int i = 0; i < lista.length; i++) {
             String tempOrden = lista[i].replace("-", "'(");
             System.out.println(tempOrden);
         }*/
@@ -984,6 +988,110 @@ public class Interprete {
             // FUNCIONES
 
             case "defun":
+            nombre = comando[1];
+
+            // Comprobar si la variable ya existe previamente
+            existeVariable = false;
+            variableExistente = null;
+            for (Variable variable : variables) {
+                if (variable.getNombre().equals(nombre)) {
+                    existeVariable = true;
+                    variableExistente = variable;
+                    //System.out.println(nombre);
+
+                }
+            }
+            // Ver que tipo de expresión se guardara en la variable
+            try {
+
+                if (comando[2].split("")[0].equals("'")) { // Texto
+
+                    if (existeVariable) {
+                        variableExistente.setValor(comando[2].trim().substring(1));
+                    } else {
+                        variables.add(new Variable(nombre, comando[2].trim().substring(1)));
+
+                    }
+
+                } else if (isNumeric(comando[2])) { // Es un numero
+                    if (existeVariable) {
+                        variableExistente.setValor(comando[2].trim());
+                    } else {
+                        variables.add(new Variable(nombre, comando[2].trim()));
+                    }
+
+                } else { // Variable
+                    Boolean existe = false;
+                    for (Variable variable : variables) {
+                        if (variable.getNombre().equals(comando[2])) {
+                            existe = true;
+                            if (existeVariable) {
+                                variableExistente.setValor(variable.getValor());
+                            } else {
+                                variables.add(new Variable(nombre, variable.getValor()));
+                            }
+                        }
+                    }
+
+                    if (!existe)
+                        vista.prinrErr("[!] " + comando[2] + " no esta definido como variable o funcion");
+                }
+
+            } catch (Exception e) {
+                // Ir a traer la siguiente linea del comando
+                orden = lista[i + 1];
+                orden = orden.replace("-", "'(");
+                comando = orden.split(" ");
+
+                if (comando[0].split("")[0].equals("'")) // texto - en forma de lista
+                    if (existeVariable) {
+                        variableExistente.setValor(orden.trim().substring(1));
+                    } else {
+                        variables.add(new Variable(nombre, orden.trim().substring(1)));
+                    }
+
+                if (comando[0].split("")[0].equals("(")) { // Lista
+
+                    // Limpiar lista
+                    orden = orden.substring(0, orden.length() - 1);
+                    orden = orden.substring(1);
+                    String[] elementos = orden.split(" ");
+
+                    String mensaje = "";
+
+                    for (int j = 0; j < elementos.length; j++) {
+
+                        // Ver si que tipo de elemento hay en la lista
+                        if (elementos[j].split("")[0].equals("'")) { // texto
+                            mensaje += elementos[j].substring(1) + " ";
+                        } else if (isNumeric(elementos[j])) { // Expresión posfix
+                            mensaje += elementos[j] + " ";
+                        } else { // Variable
+                            Boolean existe = false;
+                            for (Variable variable : variables) {
+                                if (variable.getNombre().equals(elementos[j])) {
+                                    existe = true;
+                                    mensaje += variable.getValor() + " ";
+                                }
+                            }
+
+                            if (!existe)
+                                vista.prinrErr("[!] " + comando[1] + " no esta definido como variable o funcion");
+
+                        }
+
+                    }
+
+                    if (existeVariable) {
+                        variableExistente.setValor(mensaje);
+                    } else {
+                        variables.add(new Variable(nombre, mensaje));
+                    }
+
+                }
+            }
+            
+                
                 break;
 
             // CONDICIONALES
@@ -1047,7 +1155,7 @@ public class Interprete {
                     num1 = Integer.parseInt(String.valueOf(aa));
                     num2 = Integer.parseInt(String.valueOf(ab));
                     System.out.println(num1 + num2);
-                }else if(eval.charAt(1) == '−'){
+                }else if(eval.charAt(1) == 'r'){
                     aa = eval.charAt(3);
                     ab = eval.charAt(5);
                     num1 = Integer.parseInt(String.valueOf(aa));
@@ -1091,10 +1199,33 @@ public class Interprete {
                 break;
 
             case "atom":
-                /*
-                String atom = comando[1];
-                Variable atomm = null;
-                */
+                try {// Si es una lista dentro de una variable
+
+                    String tempNombre = comando[1];
+                    for (Variable variable : variables) {
+                        if (variable.getNombre().equals(tempNombre)) {
+                            if (variable.getValor().split(" ").length > 0) {
+                                vista.print("T --");
+                                break;
+                            } else {
+                                vista.print("nil --");
+                                break;
+                            }
+                        }
+                    }
+
+                } catch (Exception e) { // Si se esta creando la lista
+                    // Ir a traer la siguiente linea del comando
+                    orden = lista[i + 1];
+                    orden = orden.replace("-", "'(");
+                    comando = orden.split(" ");
+                    if(comando.length > 0){
+                        vista.print("nil");
+                    }else{
+                        vista.print("T");
+                    }
+                    
+                }
                 break;
 
             case "numberp": //Ejemplo numberp (numberp 10) (setq a(10)) (numberp a) (setq c('hola'))
@@ -1119,14 +1250,12 @@ public class Interprete {
                         vista.print("nil");
                     }
                 }else{
-                    abc = vall.getValor();
+                    abc = vall.getValor().trim();
 
                     if(isNumeric(abc)){
                         vista.print("T");
                     }else{
                         vista.print("nil");
-                        System.out.println("---> " + vall);
-                        System.out.println("---> " + abc.getClass().getSimpleName());
                     }
                 }
 
@@ -1134,6 +1263,47 @@ public class Interprete {
                 break;
 
             }
+
+            String ppp = lista[0];
+            char num1 = ' ';
+            char num2 = ' ';
+            float numm1 = 0;
+            float numm2 = 0;
+
+            try{
+                if(ppp.charAt(0) == '+'){
+                    num1 = ppp.charAt(2);
+                    num2 = ppp.charAt(4);
+                    numm1 = Integer.parseInt(String.valueOf(num1));
+                    numm2 = Integer.parseInt(String.valueOf(num2));
+                    System.out.println(numm1 + numm2);
+                }else if(ppp.charAt(0) == 'r'){
+                    num1 = ppp.charAt(2);
+                    num2 = ppp.charAt(4);
+                    numm1 = Integer.parseInt(String.valueOf(num1));
+                    numm2 = Integer.parseInt(String.valueOf(num2));
+                    System.out.println(numm1 - numm2);
+                }else if(ppp.charAt(0) == '*'){
+                    num1 = ppp.charAt(2);
+                    num2 = ppp.charAt(4);
+                    numm1 = Integer.parseInt(String.valueOf(num1));
+                    numm2 = Integer.parseInt(String.valueOf(num2));
+                    System.out.println(numm1 * numm2);
+                }else if(ppp.charAt(0) == '/'){
+                    num1 = ppp.charAt(2);
+                    num2 = ppp.charAt(4);
+                    numm1 = Integer.parseInt(String.valueOf(num1));
+                    numm2 = Integer.parseInt(String.valueOf(num2));
+                    System.out.println(numm1 / numm2);
+                }
+            }catch(Exception k){
+                
+            }
+            
+            
+
+
+
 
         }
 
